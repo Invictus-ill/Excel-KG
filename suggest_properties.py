@@ -1,6 +1,6 @@
 #TODO Should handle errors
 from itertools import permutations, combinations
-
+import plotly.graph_objects as go
 from aenum import NoneType
 from gremlin_python import statics
 from gremlin_python.process.anonymous_traversal import traversal
@@ -9,7 +9,7 @@ from gremlin_python.process.strategies import *
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.structure.graph import Graph
 import numpy
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from pandas import ExcelWriter
 import os
 
@@ -274,7 +274,6 @@ class suggest:
 
             
 
-"""
 class Visualize:
 
     def draw_graph(self, G):
@@ -284,14 +283,17 @@ class Visualize:
         mapping = dict()
         mapping_edges = dict()
         for i in G.nodes.data():
-            mapping[i[0]] = i[1]['labelV']
+            try:
+                mapping[i[0]] = i[1]['labelV']
+            except:
+                mapping[i[0]] = i[1]['$kg_labelV']
             
         # for i in G.edges.data():
         #     mapping_edges[(i[0], i[1])] = i[2]['labelE']
             
         nx.draw(G, pos, with_labels=True, labels = mapping)
-        nx.draw_networkx_edge_labels(G,pos, edge_labels=mapping_edges)    
-"""   
+        plt.draw()
+        plt.show()
 
 connection = DriverRemoteConnection('ws://localhost:8182/gremlin', 'g')
 g = traversal().withRemote(connection)
@@ -326,6 +328,8 @@ G = nx.DiGraph()
 excel = excel_node()
 G.add_nodes_from(excel.convert_nodes(Excel_path))
 
+vis = Visualize()
+vis.draw_graph(G)
 nx.write_graphml(G, "data/graph_excel.graphml")
 
 
@@ -335,5 +339,6 @@ Excel_path2 = "data/Inventory Management.xlsx"
 
 G = s.suggest_workbooks(g, (Excel_path1, Excel_path2), "data/test_workbook.graphml")
 
+vis.test_visualize(G["Connection"])
 connection.close()
     
